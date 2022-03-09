@@ -1,12 +1,20 @@
 import {EditSSMRequest, GetSSMRequest} from "../contracts";
 import axios from 'axios';
+import {Partial} from "rollup-plugin-typescript2/dist/partial";
 
-const url = 'https://dev-api.qayon.com/ssm/v1';
+export type SSMClientConfig = {
+  url: string;
+}
+
+export const ssmClientConfig:SSMClientConfig = {
+  url: 'https://dev-api.qayon.com/ssm/v1',
+}
 
 export interface ISSMClient<T=any> {
   get():Promise<T>,
   edit(update:{[x:string]:string}):Promise<T & typeof update>,
   remove(keys:string[]):Promise<Partial<T>>,
+  editAndRemove(edit:{[x:string]:string}, remove:string[]):Promise<T>,
 }
 
 export class SSMClient<T=any> implements ISSMClient<T> {
@@ -18,7 +26,7 @@ export class SSMClient<T=any> implements ISSMClient<T> {
 
   get:ISSMClient['get'] = () => {
     const getRequest: GetSSMRequest = {requestType: "getSSM", token: this.token};
-    return axios.post(url, getRequest).then(r => r.data)
+    return axios.post(ssmClientConfig.url, getRequest).then(r => r.data)
   }
 
   edit:ISSMClient['edit'] = (update) => {
@@ -27,7 +35,7 @@ export class SSMClient<T=any> implements ISSMClient<T> {
       token: this.token,
       params: update
     }
-    return axios.post(url, editRequest).then(r => r.data);
+    return axios.post(ssmClientConfig.url, editRequest).then(r => r.data);
   }
 
   remove:ISSMClient['remove'] = (keys) => {
@@ -36,6 +44,16 @@ export class SSMClient<T=any> implements ISSMClient<T> {
       token: this.token,
       remove: keys
     }
-    return axios.post(url, editRequest).then(r => r.data);
+    return axios.post(ssmClientConfig.url, editRequest).then(r => r.data);
+  }
+
+  editAndRemove(edit: { [p: string]: string }, remove: string[]): Promise<T> {
+    const editRequest: EditSSMRequest = {
+      requestType: "editSSM",
+      token: this.token,
+      params: edit,
+      remove,
+    }
+    return axios.post<T>(ssmClientConfig.url, editRequest).then(r => r.data);
   }
 }
