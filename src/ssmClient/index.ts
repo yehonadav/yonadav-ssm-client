@@ -7,7 +7,7 @@ export type SSMClientConfig = {
 }
 
 export const ssmClientConfig:SSMClientConfig = {
-  url: 'https://dev-api.qayon.com/ssm/v1',
+  url: 'https://api.qayon.com/ssm/v1',
 }
 
 export interface ISSMClient<T=any> {
